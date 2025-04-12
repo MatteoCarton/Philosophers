@@ -6,7 +6,7 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:35 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/13 00:44:07 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/13 00:57:15 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,26 +87,6 @@ t_rules *init_rules(int argc, char **argv)
     return (rules);
 }
 
-t_philo *init_philo(t_rules *rules)
-{
-    int i;
-    t_philo *philos; // On cree un tableau de philosophes
-    
-    philos = malloc(sizeof(t_philo) * rules->number_of_philosophers);
-    if (!philos)
-        return (NULL);
-
-    i = 0;
-    while (i < rules->number_of_philosophers)
-    {
-        philos[i].philo_id = i + 1; //le 1er aura l'id 1, puis 2, etc.
-        philos[i].rules = rules;
-        i++;
-    }
-    
-    return (philos);
-}
-
 t_fork *init_forks(int number_of_philosophers)
 {
     int i;
@@ -135,6 +115,31 @@ t_fork *init_forks(int number_of_philosophers)
     return (forks);
 }
 
+t_philo *init_philos(t_rules *rules, t_fork *forks)
+{
+    int i;
+    t_philo *philos; // On cree un tableau de philosophes
+    
+    philos = malloc(sizeof(t_philo) * rules->number_of_philosophers);
+    if (!philos)
+        return (NULL);
+
+    i = 0;
+    while (i < rules->number_of_philosophers)
+    {
+        philos[i].philo_id = i + 1; //le 1er aura l'id 1, puis 2, etc.
+        philos[i].rules = rules;
+        philos[i].left_fork = &forks[i]; // Fourchette a gauche = celle de son ID
+        if (i == rules->number_of_philosophers - 1) // Fourchette a droite = celle du philosophe suivant
+            philos[i].right_fork = &forks[0];
+        else
+            philos[i].right_fork = &forks[i + 1];
+        i++;
+    }
+    
+    return (philos);
+}
+
 int main(int argc, char **argv)
 {
     int i;
@@ -148,12 +153,13 @@ int main(int argc, char **argv)
     rules = init_rules(argc, argv);
     if (!rules)
         return (1);
-    philos = init_philo(rules);
-    if (!philos)
-        return (free(rules), 1);
     forks = init_forks(rules->number_of_philosophers);
     if (!forks)
-        return (free(rules), free(philos), 1);
+        return (free(rules), 1);
+    philos = init_philos(rules, forks);
+    if (!philos)
+        return (free(rules), free(forks), 1);
+    
     
     
     // A LA FIN DU PROGRAMME, IL FAUT :
