@@ -6,14 +6,14 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:32 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/12 22:57:48 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/12 23:11:32 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
-#define PHILOSOPHERS_H
+# define PHILOSOPHERS_H
 
-#include "libft/libft.h"
+#include "../libft/libft.h"
 #include <pthread.h>
 
 typedef enum {
