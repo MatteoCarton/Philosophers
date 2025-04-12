@@ -6,7 +6,7 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:32 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/12 23:11:32 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/12 23:44:07 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ typedef struct s_rules {
     int number_of_times_each_philosopher_must_eat;
 } t_rules;
 
-typedef struct s_philosopher
+typedef struct s_philo
 {
     pthread_t philo_thread;
     t_rules *rules; // lien vers les regles
@@ -50,7 +50,7 @@ typedef struct s_philosopher
     t_fork left_fork;
     long long last_meal_time;
     
-} t_philosopher;
+} t_philo;
 
 
 int main(int argc, char **argv);

@@ -6,7 +6,7 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:35 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/12 23:41:09 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/12 23:56:38 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,9 +87,30 @@ t_rules *init_rules(int argc, char **argv)
     return (rules);
 }
 
+t_philo *init_philo(t_rules *rules)
+{
+    size_t i;
+    t_philo *philos; // On cree un tableau de philosophes
+    
+    philos = malloc(sizeof(t_philo) * rules->number_of_philosophers);
+    if (!philos)
+        return (NULL);
+
+    i = 0;
+    while (i < rules->number_of_philosophers)
+    {
+        philos[i].philo_id = i + 1; //le 1er aura l'id 1, puis 2, etc.
+        philos[i].rules = rules;
+        i++;
+    }
+    
+    return (philos);
+}
+
 int main(int argc, char **argv)
 {
     t_rules *rules;
+    t_philo *philos;
     if(argc != 5 && argc != 6)
         return (1);
     if (check_arguments(argc, argv) == 0)
@@ -97,7 +118,9 @@ int main(int argc, char **argv)
     rules = init_rules(argc, argv);
     if (!rules)
         return (1);
-
+    philos = init_philo(rules);
+    
     free(rules);
+    free(philos);
     return (0);
 }
