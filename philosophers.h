@@ -6,13 +6,14 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:32 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/12 22:02:28 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/12 22:57:48 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
 #define PHILOSOPHERS_H
 
+#include "libft/libft.h"
 #include <pthread.h>
 
 typedef enum {
@@ -27,7 +28,7 @@ typedef enum {
 }   philo_state;
 
 typedef struct s_fork {
-    pthread_mutex_t mutex;
+    pthread_mutex_t mutex; // le cadenas
     bool is_taken;
 } t_fork;
 
@@ -42,7 +43,7 @@ typedef struct s_rules {
 typedef struct s_philosopher
 {
     pthread_t philo_thread;
-    t_rules *rules;
+    t_rules *rules; // lien vers les regles
     int philo_id;
     philo_state current;
     t_fork right_fork;
@@ -51,5 +52,7 @@ typedef struct s_philosopher
     
 } t_philosopher;
 
+
+int main(int argc, char **argv);
 
 #endif
