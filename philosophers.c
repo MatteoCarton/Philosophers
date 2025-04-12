@@ -6,7 +6,7 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:35 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/12 23:56:38 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/13 00:44:07 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ int valid_number(char *str)
     return (1);
 }
 
-int check_arguments(int argc, char **argv)
+int check_arguments(char **argv)
 {
     size_t i;
 
@@ -89,7 +89,7 @@ t_rules *init_rules(int argc, char **argv)
 
 t_philo *init_philo(t_rules *rules)
 {
-    size_t i;
+    int i;
     t_philo *philos; // On cree un tableau de philosophes
     
     philos = malloc(sizeof(t_philo) * rules->number_of_philosophers);
@@ -107,20 +107,66 @@ t_philo *init_philo(t_rules *rules)
     return (philos);
 }
 
+t_fork *init_forks(int number_of_philosophers)
+{
+    int i;
+    t_fork *forks;
+
+    forks = malloc(sizeof(t_fork) * number_of_philosophers);
+    if (!forks)
+        return (NULL);
+    i = 0;
+    while (i < number_of_philosophers)
+    {
+        if (pthread_mutex_init(&forks[i].mutex, NULL) != 0) // elle retourne 0 si c'est good
+        { // si ca echoue il faut detruire tous les mutex qu'on a deja crees
+            while (i > 0)
+            {
+                i--;
+                pthread_mutex_destroy(&forks[i].mutex);
+            }
+            free (forks);
+            return (NULL);
+        }
+        forks[i].is_taken = false;
+        i++;
+    }
+    
+    return (forks);
+}
+
 int main(int argc, char **argv)
 {
+    int i;
     t_rules *rules;
     t_philo *philos;
+    t_fork *forks;
     if(argc != 5 && argc != 6)
         return (1);
-    if (check_arguments(argc, argv) == 0)
+    if (check_arguments(argv) == 0)
         return (1);
     rules = init_rules(argc, argv);
     if (!rules)
         return (1);
     philos = init_philo(rules);
+    if (!philos)
+        return (free(rules), 1);
+    forks = init_forks(rules->number_of_philosophers);
+    if (!forks)
+        return (free(rules), free(philos), 1);
     
+    
+    // A LA FIN DU PROGRAMME, IL FAUT :
+    // Detruire tous les mutex
+    // Puis liberer toute la memoire
+    i = 0;
+    while (i < rules->number_of_philosophers)
+    {
+        pthread_mutex_destroy(&forks[i].mutex);
+        i ++;
+    }
     free(rules);
     free(philos);
+    free(forks);
     return (0);
 }
