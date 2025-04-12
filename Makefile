@@ -2,33 +2,26 @@ NAME = philo
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
-INCLUDES = -I includes -I libft
+INCLUDES = -I includes
 
-LIBFT = libft/libft.a
-
-SRCS = philosophers.c
+SRCS = philosophers.c ft_utils.c
 
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
 
-$(NAME): $(LIBFT) $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) $(LIBFT) -o $(NAME)
-
-$(LIBFT):
-	make -C libft
+$(NAME): $(OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $(NAME)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
 	rm -f $(OBJS)
-	make clean -C libft
 
 fclean: clean
 	rm -f $(NAME)
-	make fclean -C libft
 
 re: fclean all
 
-.PHONY: all clean fclean re 
+.PHONY: all clean fclean re

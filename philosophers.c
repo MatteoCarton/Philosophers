@@ -6,7 +6,7 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:35 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/13 00:57:15 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/13 01:01:41 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ t_philo *init_philos(t_rules *rules, t_fork *forks)
     i = 0;
     while (i < rules->number_of_philosophers)
     {
-        philos[i].philo_id = i + 1; //le 1er aura l'id 1, puis 2, etc.
+        philos[i].philo_id = i;
         philos[i].rules = rules;
         philos[i].left_fork = &forks[i]; // Fourchette a gauche = celle de son ID
         if (i == rules->number_of_philosophers - 1) // Fourchette a droite = celle du philosophe suivant

@@ -6,7 +6,7 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:32 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/12 23:44:07 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/13 01:08:04 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,12 +42,12 @@ typedef struct s_rules {
 
 typedef struct s_philo
 {
-    pthread_t philo_thread;
-    t_rules *rules; // lien vers les regles
     int philo_id;
+    t_rules *rules; // lien vers les regles
+    t_fork *right_fork;
+    t_fork *left_fork;
+    pthread_t philo_thread;
     philo_state current;
-    t_fork right_fork;
-    t_fork left_fork;
     long long last_meal_time;
     
 } t_philo;
