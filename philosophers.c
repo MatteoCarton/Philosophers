@@ -6,7 +6,7 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:35 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/13 11:46:14 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/13 12:54:12 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,16 @@ int check_arguments(char **argv)
 // j'init l'instance des regles puis je remplis chaque regle 1 par 1 via les args
 t_rules *init_rules(int argc, char **argv)
 {
-    t_rules *rules = malloc(sizeof(t_rules));
+    t_rules *rules ;
+    struct timeval current_time;
+    
+    rules = malloc(sizeof(t_rules));
     if (!rules)
         return (NULL);
-
+    // On start le chrono
+    gettimeofday(&current_time, NULL);
+    rules->start_time = current_time.tv_sec * 1000 + current_time.tv_usec / 1000;
+    
     rules->number_of_philosophers = ft_atoi(argv[1]);
     if (rules->number_of_philosophers <= 0)
     {
@@ -87,6 +93,8 @@ t_rules *init_rules(int argc, char **argv)
     }
     else
         rules->optional_arg = false;
+    if (pthread_mutex_init(&rules->print_mutex, NULL) != 0)
+            return (free(rules), NULL);
     return (rules);
 }
 
@@ -131,7 +139,7 @@ t_philo *init_philos(t_rules *rules, t_fork *forks)
     i = 0;
     while (i < rules->number_of_philosophers)
     {
-        philos[i].philo_id = i;
+        philos[i].philo_id = i + 1; // l'id commence a 1 
         philos[i].rules = rules;
         philos[i].meals = 0;
         gettimeofday(&current_time, NULL);
@@ -147,15 +155,26 @@ t_philo *init_philos(t_rules *rules, t_fork *forks)
     return (philos);
 }
 
+void display_state(t_philo *philo, char *msg)
+{
+    struct timeval current_time;
+    long long now;
+
+    gettimeofday(&current_time, NULL);
+    now = current_time.tv_sec * 1000 + current_time.tv_usec / 1000;
+    pthread_mutex_lock(&philo->rules->print_mutex);
+    printf("%lld %d %s\n", now - philo->rules->start_time, philo->philo_id, msg);
+    pthread_mutex_unlock(&philo->rules->print_mutex);
+    return ;
+}
+
 void *routine(void *arg)
 {
-    int i;
     t_philo *philo;
     struct timeval current_time;
     long long now;
     
     philo = (t_philo *)arg;
-    i = 0;
     
     while (42)
     {
@@ -164,23 +183,30 @@ void *routine(void *arg)
         gettimeofday(&current_time, NULL);
         now = current_time.tv_sec * 1000 + current_time.tv_usec / 1000;
         if (now - philo->last_meal_time >= philo->rules->time_to_die)
+        {
+            display_state(philo, "died");
             return (NULL);
-        
+        }
         if (philo->rules->optional_arg == true &&
             philo->meals == philo->rules->number_of_times_each_philosopher_must_eat)
-            return (NULL);33
+            return (NULL);
         
-        if (philo->philo_id == philo->rules->number_of_philosophers - 1)
+        if (philo->philo_id == philo->rules->number_of_philosophers)
         { // si c'est le dernier philo il commence par la fourchette droite
             pthread_mutex_lock(&philo->right_fork->mutex);
+            display_state(philo, "has taken a fork");
             pthread_mutex_lock(&philo->left_fork->mutex);
+            display_state(philo, "has taken a fork");
         }
         else
         {
             pthread_mutex_lock(&philo->left_fork->mutex);
+            display_state(philo, "has taken a fork");
             pthread_mutex_lock(&philo->right_fork->mutex);
+            display_state(philo, "has taken a fork");
         }
         philo->current = eating;
+        display_state(philo, "is eating");
         philo->meals++;
         gettimeofday(&current_time, NULL);
         philo->last_meal_time = current_time.tv_sec * 1000 + current_time.tv_usec / 1000;
@@ -188,8 +214,10 @@ void *routine(void *arg)
         pthread_mutex_unlock(&philo->left_fork->mutex);
         pthread_mutex_unlock(&philo->right_fork->mutex);
         philo->current = sleeping;
+        display_state(philo, "is sleeping");
         usleep(philo->rules->time_to_sleep * 1000); 
         philo->current = thinking;
+        display_state(philo, "is thinking");
     }
     
     return (NULL); // voir ce qu'il faut return
@@ -201,6 +229,7 @@ int main(int argc, char **argv)
     t_rules *rules;
     t_philo *philos;
     t_fork *forks;
+    pthread_t *threads;
 
     // ON INIT TOUS (les regles, les fourchettes et les philosophes)
     if(argc != 5 && argc != 6)
@@ -219,9 +248,23 @@ int main(int argc, char **argv)
     
     
     // PROGRAMME EN COURS
-
-    
-    
+    threads = malloc(sizeof(pthread_t) * rules->number_of_philosophers);
+    if (!threads)
+        return (free(rules), free(forks), free(philos), 1);
+    i = 0;
+    while (i < rules->number_of_philosophers)
+    {
+        if (pthread_create(&threads[i], NULL, routine, &philos[i]) != 0)
+        {
+            while (i > 0)
+            {
+                 i--;
+                pthread_join(threads[i], NULL); // On attend que chaque thread se termine
+            }
+            return (free(rules), free(forks), free(philos), free(threads), 1);
+        }
+        i++;
+    }
     
     // A LA FIN DU PROGRAMME, IL FAUT :
     // Detruire tous les mutex
@@ -230,10 +273,13 @@ int main(int argc, char **argv)
     while (i < rules->number_of_philosophers)
     {
         pthread_mutex_destroy(&forks[i].mutex);
-        i ++;
+        pthread_join(threads[i], NULL);
+        i++;
     }
+    pthread_mutex_destroy(&rules->print_mutex);
     free(rules);
     free(philos);
     free(forks);
+    free(threads);
     return (0);
 }

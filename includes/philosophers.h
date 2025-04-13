@@ -6,7 +6,7 @@
 /*   By: mcarton <mcarton@student.s19.be>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 21:20:32 by mcarton           #+#    #+#             */
-/*   Updated: 2025/04/13 11:25:57 by mcarton          ###   ########.fr       */
+/*   Updated: 2025/04/13 12:51:33 by mcarton          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "../libft/libft.h"
 #include <pthread.h>
 #include <sys/time.h>
+#include <stdio.h>
 
 typedef enum {
     false,
@@ -40,6 +41,8 @@ typedef struct s_rules {
     long long time_to_sleep;
     int number_of_times_each_philosopher_must_eat;
     bool optional_arg;
+    pthread_mutex_t print_mutex;
+    long long start_time;
 } t_rules;
 
 typedef struct s_philo
